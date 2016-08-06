@@ -46,12 +46,76 @@
 
 \begin{frame}
   \frametitle{0x00. 루팅?}
-  \framesubtitle{https://g.co/ABH}
+  \framesubtitle{\url{https://g.co/ABH}}
 
   \begin{itemize}
-  \item 안드로이드 기기의 UID=0 권한을 획득하는 행위
-  \item 이를 통해, 앱이 원래대로라면 가질 수 없는 권한을 획득할 수 있음
-  \item 하지만 잠재적인 보안 이슈를 이유로, 많은 금융 앱들이 루트된 기기에서 동작을 거부함
+  \item 안드로이드 기기의 UID=0 권한을 가질 수 있게 도와주는 root helper 를 설치하는 행위
+  \item<2-> 이를 통해, 앱이 원래대로라면 가질 수 없는 UID=0 권한을 획득할 수 있음
+  \item<3-> 하지만 잠재적인 보안 이슈를 이유로, 많은 금융 앱들이 루트된 기기에서 동작을 거부함
+  \item<4-> \textbf{이를 동작 가능하게 해 보자}
+  \end{itemize}
+\end{frame}
+ 
+\section[Section]{루팅 탐지와 무력화}
+\begin{frame}
+  \frametitle{0x01. 루팅 탐지}
+  \framesubtitle{librandomseccorp.so}
+
+  \begin{itemize}
+  \item 1세대: 실행 후 에러 코드 체크
+  \item 2세대: /system/xbin/su 유무 체크 (I wonder why they didn't used PATH envar)
+  \item 3세대: NDK 에서 libc 함수들을 이용해 체크
+  \item 4세대: NDK 에서 system call 을 직접 호출해 체크 (iOS 에서 관찰됨)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x02. 루팅 탐지 무력화}
+  \framesubtitle{Three Rings for the Elven-kings under the sky}
+
+  \begin{itemize}
+  \item 1세대: 가장 초보적 - 권한 허용 거부를 누른다.
+  \item 2세대: XPosed 와 같은 Java hooking library
+  \item 3세대: Cydia substrate (for NDK hook)
+  \item 4세대: LKM rootkit, kernel patching, etc.
+  \item 혹은 가장 귀찮은 방법: 앱을 패치해서 탐지 루틴을 무력화한다.
+  \end{itemize}
+\end{frame}
+
+\section[Section]{Rootkit}
+\begin{frame}
+  \frametitle{0x03. User-mode rootkit - Xposed framework}
+  \framesubtitle{Seven for the Dwarf-lords in their halls of stone}
+
+  \begin{itemize}
+  \item 일반 앱들에게, DalvikVM(or ART) 에 코드를 인젝션 할 수 있는 권한을 주는 프레임워크
+  \item 이를 이용, 리플렉션이라는 흑법을 통해 순정 펌웨어(?) 를 커스텀 롬처럼 만들어주는 확장을 개발할 수 있게 된다
+  \item 은행 앱에 훅을 주입하는것으로 2세대 루팅 탐지 우회 가능
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x04. User-mode rootkit - Cydia Substrate}
+  \framesubtitle{Nine for Mortal Men doomed to die}
+
+  \begin{itemize}
+  \item 네이티브 라이브러리 훅을 제공하는 프레임워크
+  \item Apple iOS 의 Cydia Substrate 의 안드로이드 포트
+  \item 이를 이용하면, NDK 의 libc 콜들을 후킹 가능
+  \item 은행 앱이 부르는 libc 함수들을 후킹해서, 3세대 탐지 우회 가능
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x04. Kernel mode rootkit - patching}
+  \framesubtitle{One for the Dark Lord on his dark throne}
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x01. LKM rootkit}
+  \framesubtitle{One Ring to rule them all}
+
+  \begin{itemize}
+  \item LKM
   \end{itemize}
 \end{frame}
 
