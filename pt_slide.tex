@@ -63,7 +63,7 @@
   \item 1세대: 실행 후 에러 코드 체크
   \item 2세대: /system/xbin/su 유무 체크 (I wonder why they didn't used PATH envar)
   \item 3세대: NDK 에서 libc 함수들을 이용해 체크
-  \item 4세대: NDK 에서 system call 을 직접 호출해 체크 (iOS 에서 관찰됨)
+  \item 4세대: system call 을 직접 호출해 체크 (iOS 에서 관찰됨)
   \end{itemize}
 \end{frame}
 
@@ -106,20 +106,35 @@
 
 \begin{frame}
   \frametitle{0x05. Kernel mode rootkit}
-  \framesubtitle{One for the Dark Lord on his dark throne}
+  \framesubtitle{One for the Dark Lord on his dark throne In the Land of Mordor}
 
   \begin{itemize}
-  \item 인-커널 시스템 콜 후킹
-  \item 커널 내에서 
+  \item 직접적인 커널 변형.
+  \item 커널 내에서, 커널의 메모리 공간을 액세스하며, 이를 수정할 수 있음.
+  \item 이를 이용한 system call 후킹을 통해, 유저랜드에 보여지는 것들을 조정할 수 있음.
+  \item 4세대 탐지 우회 가능
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{0x01. LKM rootkit}
+  \frametitle{0x06. LKM rootkit}
   \framesubtitle{One Ring to rule them all}
 
   \begin{itemize}
-  \item LKM
+  \item Linux Kernel Module
+  \item Ring 0 권한에서 실행
+  \item \textbf{일반적인} 앱들은 같은 권한을 가질 수 없음
+  \item 만일 LKM이 자신을 적극적으로 숨기고자 하면 Ring 3 에서는 이를 알 수 없음.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x06. LKM rootkit}
+  \framesubtitle{One Ring to bring them all and in the darkness bind them}
+
+  LKM 루트킷의 예
+  \begin{itemize}
+  \item \url{https://github.com/m0nad/Diamorphine}
   \end{itemize}
 \end{frame}
 
