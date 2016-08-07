@@ -142,7 +142,7 @@
   \begin{itemize}
   \item MMU 는 메모리를 관리하기 위해, 다단계 페이징을 사용한다
   \item Qualcomm Snapdragon 800 의 경우 3단계 페이징이 사용된다.
-  \item 페이지의 속성을 변경하기 위해서는, pgd -> pud -> pmd 순으로, 페이지 테이블을 찾아간 뒤
+  \item 페이지의 속성을 변경하기 위해서는, pgd $\rightarrow$ pud $\rightarrow$ pmd 순으로, 페이지 테이블을 찾아간 뒤
   \item 플래그를 변경하면 된다.
   \end{itemize}
 \end{frame}
@@ -161,7 +161,7 @@
 
 \begin{frame}
   \frametitle{0x09. 시스템 콜 후킹 - code hot patching}
-  \framesubtitle{``Uptime'' funk}
+  \framesubtitle{*Uptime* funk}
 
   \begin{itemize}
   \item 폰 노이만 구조 컴퓨터에서는, homoiconicity 가 성립한다.
@@ -173,24 +173,47 @@
 
 \begin{frame}
   \frametitle{0x09. 시스템 콜 후킹 - code hot patching}
-  \framesubtitle{``Uptime'' funk}
+  \framesubtitle{*Uptime* funk}
 
   \begin{itemize}
   \item 코드 핫 패칭을 할 시에는, 코드를 수정 후, dcache 와 icache 를 동기화시켜주는 작업이 필요하다.
   \item 이를 위해서는, Level of Unification 까지 캐시를 flush 해, 모든 코어가 패치된 메모리를 같이 공유할 수 있도록 해야 한다.
-  \item ARM infocenter 에서 찾을 수 있던 어셈 코드로 테스트 했을 시, Exynos 4412 에서는 잘 동작했지만, Snapdragon 800 에서는 동작하지 않았음
-  \item 이를 해결하기 위한 작업이 필요하다.
+  \item ARM infocenter 에서 찾을 수 있던 어셈 코드로 테스트 했을 시
+  \item Exynos 4412 에서는 잘 동작했지만, Snapdragon 800 에서는 동작하지 않았음
+  \item 이를 해결하기 위한 작업이 필요하다. (May require NDA'ed Snapdragon datasheet)
+  \end{itemize}
+\end{frame}
+
+\section[Section]{은닉 코드 구현}
+\begin{frame}
+  \frametitle{0x0A. 파일 은닉}
+  \framesubtitle{Nazgûl}
+
+  \begin{itemize}
+  \item open(2), stat64(2), access(2), getdents64(2) 와 같은 시스템 콜을 후킹하면, 원하는 파일을 은닉할 수 있다.
+  \item 이를 이용, Superuser.apk, /system/xbin/su 등을 특정 UID 에게만 숨기고, 나머지에는 노출한다면?
+  \item $\rightarrow$ 루팅 탐지 우회 가능
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{0xFF. TBDs}
+  \frametitle{0x0B. TBDs}
   \framesubtitle{}
 
   \begin{itemize}
   \item mmuhack.c 의 AMD64, AArch64 포팅
   \item Qualcomm Snapdragon 이외의 다른 프로세서 (ex. HiSilicon Kirin, Samsung Exynos, etc) 에서의 테스트
   \end{itemize}
+\end{frame}
+
+\section[Section]{시연}
+\begin{frame}
+  \frametitle{0x0C. 시연}
+  \framesubtitle{}
+
+  \begin{center}
+  시연
+  \end{center}
 \end{frame}
 
 \section[Section]{끝}
@@ -204,7 +227,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{0x0B. License}
+  \frametitle{0x0E. License}
   \framesubtitle{}
   Copyright (C)  2016 perillamint\linebreak
   Permission is granted to copy, distribute and/or modify this document
