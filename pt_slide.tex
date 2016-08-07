@@ -89,6 +89,7 @@
   \item 일반 앱들에게, DalvikVM(or ART) 에 코드를 인젝션 할 수 있는 권한을 주는 프레임워크
   \item 이를 이용, 리플렉션이라는 흑법을 통해 순정 펌웨어(?) 를 커스텀 롬처럼 만들어주는 확장을 개발할 수 있게 된다
   \item 은행 앱에 훅을 주입하는것으로 2세대 루팅 탐지 우회 가능
+  \item 구현체: Rootcloak (Android)
   \end{itemize}
 \end{frame}
 
@@ -101,40 +102,60 @@
   \item Apple iOS 의 Cydia Substrate 의 안드로이드 포트
   \item 이를 이용하면, NDK 의 libc 콜들을 후킹 가능
   \item 은행 앱이 부르는 libc 함수들을 후킹해서, 3세대 탐지 우회 가능
+  \item 구현체: Rootcloak Plus (Android), KBankTweak (iOS)
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{0x05. Kernel mode rootkit}
-  \framesubtitle{One for the Dark Lord on his dark throne In the Land of Mordor}
+  \framesubtitle{One for the Dark Lord on his dark throne in the Land of Mordor}
 
   \begin{itemize}
   \item 직접적인 커널 변형.
+  \item Ring 0 권한에서 실행
   \item 커널 내에서, 커널의 메모리 공간을 액세스하며, 이를 수정할 수 있음.
   \item 이를 이용한 system call 후킹을 통해, 유저랜드에 보여지는 것들을 조정할 수 있음.
+  \item \textbf{일반적인} 앱들은 같은 권한을 가질 수 없음 -- 커널 코드 인젝션을 위해서는 루트 권한 필요
+  \item 인-커널 코드가 자신을 Ring-3 어플리케이션으로부터 숨기고자 하면, 효과적으로 자기 자신을 숨길 수 있음.
   \item 4세대 탐지 우회 가능
+  \item 구현체: Hideroot PoC (Android (Linux kernel)), HideJB (iOS)
+  \end{itemize}
+\end{frame}
+
+\section[Section]{LKM 루트킷 작성}
+\begin{frame}
+  \frametitle{0x06. 메모리 보호}
+  \framesubtitle{Speak ``friend'' and write}
+
+  \begin{itemize}
+  \item MMU 는 단순히 가상 메모리 주소를 실제 메모리 주소로 번역하는 것 이외에도 메모리 권한 관리를 한다.
+  \item sys\_call\_table 을 변조하거나, 함수 프롤로그를 패치하기 위해서는 경우에 따라, 메모리 권한 변경이 필요할 수 있다.
+  \item 몇몇 제조사 커널은, 이를 위한 함수를 제공하지만 (mem\_text\_address\_writable), 바닐라 커널에는 이가 존재하지 않는다
+  \item 이에, 아키텍쳐별로, MMU 를 조작하기 위한 코드가 필요하다.
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{0x06. LKM rootkit}
+  \frametitle{0x07. 멀티-레벨 페이징}
+  \framesubtitle{}
+
+  \begin{itemize}
+  \item MMU 는 메모리를 관리하기 위해, 다단계 페이징을 사용한다
+  \item Qualcomm Snapdragon 800 의 경우 3단계 페이징이 사용된다.
+  \item 페이지의 속성을 변경하기 위해서는, pgd -> pud -> pmd 순으로, 페이지 테이블을 찾아간 뒤
+  \item 플래그를 변경하면 된다.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{0x08. 시스템 콜 후킹}
   \framesubtitle{One Ring to rule them all}
 
   \begin{itemize}
-  \item Linux Kernel Module
-  \item Ring 0 권한에서 실행
-  \item \textbf{일반적인} 앱들은 같은 권한을 가질 수 없음
-  \item 만일 LKM이 자신을 적극적으로 숨기고자 하면 Ring 3 에서는 이를 알 수 없음.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}
-  \frametitle{0x06. LKM rootkit}
-  \framesubtitle{One Ring to bring them all and in the darkness bind them}
-
-  LKM 루트킷의 예
-  \begin{itemize}
-  \item \url{https://github.com/m0nad/Diamorphine}
+  \item 시스템 콜이 불리우면, 플랫폼 종속적인 부분을 거쳐, 최종적으로 sys\_call\_table 에 도착한다
+  \item sys\_call\_table 에 들어있는 함수 포인터 주소를 조작하면, 시스템 콜이 불렸을 때, 원하는 함수를 실행하게 할 수 있다.
+  \item sys\_call\_table 의 메모리 보호를 해제했다면, 이의 내용을 변경할 수 있다.
+  \item 이를 이용해, 시스템 콜들을 후킹하자
   \end{itemize}
 \end{frame}
 
